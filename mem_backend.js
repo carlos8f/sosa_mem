@@ -35,7 +35,13 @@ module.exports = function (coll_name, backend_options) {
       });
     },
     select: function (opts, cb) {
-      var objs = coll.keys.map(function (id) {
+      var keys = coll.keys.slice();
+      if (opts.filter) keys = keys.filter(opts.filter);
+      if (opts.reverse) keys.reverse();
+      var begin = opts.offset || 0;
+      var end = opts.limit ? begin + opts.limit : undefined;
+      if (begin || end) keys = keys.slice(begin, end);
+      var objs = keys.map(function (id) {
         var key = hash(id);
         return coll.values[key] || null;
       });
