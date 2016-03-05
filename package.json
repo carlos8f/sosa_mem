@@ -1,0 +1,14 @@
+{
+  "name": "sosa_mem",
+  "version": "1.0.0",
+  "description": "Simple Object Storage Abstraction, in-memory version",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "Carlos Rodriguez <carlos@s8f.org> (http://s8f.org/)",
+  "license": "MIT",
+  "dependencies": {
+    "sosa": "~1.0.0"
+  }
+}
