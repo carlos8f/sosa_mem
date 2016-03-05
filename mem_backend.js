@@ -12,17 +12,21 @@ module.exports = function (coll_name, backend_options) {
   mem[key] || (mem[key] = {keys: [], values: {}});
   var coll = mem[key];
   return {
+    _copy: function (obj) {
+      return JSON.parse(JSON.stringify(obj));
+    },
     load: function (id, opts, cb) {
       var key = hash(id);
-      cb(null, coll.values[key] || null);
+      cb(null, this._copy(coll.values[key] || null));
     },
     save: function (id, obj, opts, cb) {
       var key = hash(id);
-      coll.values[key] = obj;
+      coll.values[key] = this._copy(obj);
       if (!~coll.keys.indexOf(id)) coll.keys.push(id);
-      cb(null, obj);
+      cb(null, coll.values[key]);
     },
     destroy: function (id, opts, cb) {
+      var self = this;
       this.load(id, opts, function (err, obj) {
         if (err) return cb(err);
         if (obj) {
@@ -31,10 +35,11 @@ module.exports = function (coll_name, backend_options) {
           var key = hash(id);
           delete coll.values[key];
         }
-        cb(null, obj || null);
+        cb(null, self._copy(obj || null));
       });
     },
     select: function (opts, cb) {
+      var self = this;
       var keys = coll.keys.slice();
       if (opts.filter) keys = keys.filter(opts.filter);
       if (opts.reverse) keys.reverse();
@@ -43,7 +48,7 @@ module.exports = function (coll_name, backend_options) {
       if (begin || end) keys = keys.slice(begin, end);
       var objs = keys.map(function (id) {
         var key = hash(id);
-        return coll.values[key] || null;
+        return self._copy(coll.values[key] || null);
       });
       cb(null, objs);
     }
