@@ -1,9 +1,9 @@
 function PlainObject () {}
 PlainObject.prototype = Object.create(null);
-function obj () { return new PlainObject }
+function newObj () { return new PlainObject }
 
 var crypto = require('crypto');
-var mem = obj();
+var mem = newObj();
 
 function hash (id) {
   return crypto.createHash('sha1').update(JSON.stringify(id)).digest('hex');
@@ -13,7 +13,7 @@ module.exports = function (coll_name, backend_options) {
   backend_options || (backend_options = {});
   var coll_path = [backend_options.prefix, coll_name].concat(backend_options.key_prefix);
   var key = hash(coll_path);
-  mem[key] || (mem[key] = {keys: [], values: obj()});
+  mem[key] || (mem[key] = {keys: [], values: newObj()});
   var coll = mem[key];
   return {
     _copy: function (obj) {
