@@ -1,6 +1,6 @@
 {
   "name": "sosa_mem",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "Simple Object Storage Abstraction, in-memory version",
   "main": "index.js",
   "scripts": {
