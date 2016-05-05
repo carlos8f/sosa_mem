@@ -1,20 +1,30 @@
+var crypto = require('crypto');
+
 function PlainObject () {}
 PlainObject.prototype = Object.create(null);
 function newObj () { return new PlainObject }
 
-var crypto = require('crypto');
-var mem = newObj();
-
-function hash (id) {
-  return crypto.createHash('sha1').update(JSON.stringify(id)).digest('hex');
-}
+var globalCache = newObj();
 
 module.exports = function (coll_name, backend_options) {
   backend_options || (backend_options = {});
-  var coll_path = [backend_options.prefix, coll_name].concat(backend_options.key_prefix);
-  var key = hash(coll_path);
-  mem[key] || (mem[key] = {keys: [], values: newObj()});
-  var coll = mem[key];
+
+  function escapeBase64 (str) {
+    return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+  }
+
+  function hash (id) {
+    return backend_options.hashKeys ? escapeBase64(crypto.createHash('sha1').update(id).digest('base64')) : id.replace(/\./g, '')
+  }
+
+  var coll_path = coll_name;
+  if (backend_options.key_prefix && backend_options.key_prefix.length) {
+    coll_path += '.' + backend_options.key_prefix.map(hash).join('.')
+  }
+
+  globalCache[coll_path] || (globalCache[coll_path] = {keys: [], values: newObj()});
+  var coll = globalCache[coll_path];
+
   return {
     _copy: function (obj) {
       return JSON.parse(JSON.stringify(obj));
@@ -58,3 +68,5 @@ module.exports = function (coll_name, backend_options) {
     }
   };
 };
+
+module.exports.globalCache = globalCache;
